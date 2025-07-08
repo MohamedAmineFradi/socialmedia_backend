@@ -57,5 +57,3 @@ This is a Spring Boot backend for a social media application. It provides RESTfu
 - `PUT /api/posts/{postId}/user/{userId}` — Update post
 - `DELETE /api/posts/{postId}/user/{userId}` — Delete post
 
-## License
-This project is licensed under the MIT License. 
