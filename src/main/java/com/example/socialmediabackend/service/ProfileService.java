@@ -1,0 +1,115 @@
+package com.example.socialmediabackend.service;
+
+import com.example.socialmediabackend.dto.ProfileDto;
+import com.example.socialmediabackend.dto.ProfileResponseDto;
+import com.example.socialmediabackend.entity.Profile;
+import com.example.socialmediabackend.entity.User;
+import com.example.socialmediabackend.repository.ProfileRepository;
+import com.example.socialmediabackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ProfileService {
+    private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
+
+    @Autowired
+    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository) {
+        this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
+    }
+
+    public ProfileResponseDto toProfileResponseDto(Profile profile) {
+        Long userId = profile.getUser() != null ? profile.getUser().getId() : null;
+        return new ProfileResponseDto(
+            profile.getId(),
+            profile.getUserName(),
+            profile.getImageUrl(),
+            profile.getBio(),
+            profile.getInfo(),
+            userId
+        );
+    }
+
+    public List<ProfileResponseDto> getAllProfileResponses() {
+        return profileRepository.findAll().stream().map(this::toProfileResponseDto).toList();
+    }
+
+    public Optional<ProfileResponseDto> getProfileResponseById(Long profileId) {
+        return profileRepository.findById(profileId).map(this::toProfileResponseDto);
+    }
+
+    public ProfileResponseDto createProfile(ProfileDto profileDto) {
+        Profile profile = new Profile();
+        profile.setUserName(profileDto.getUserName());
+        profile.setImageUrl(profileDto.getImageUrl());
+        profile.setBio(profileDto.getBio());
+        profile.setInfo(profileDto.getInfo());
+        return toProfileResponseDto(profileRepository.save(profile));
+    }
+
+    public Optional<ProfileResponseDto> updateProfile(Long profileId, ProfileDto profileDto) {
+        return profileRepository.findById(profileId).map(profile -> {
+            profile.setUserName(profileDto.getUserName());
+            profile.setImageUrl(profileDto.getImageUrl());
+            profile.setBio(profileDto.getBio());
+            profile.setInfo(profileDto.getInfo());
+            return toProfileResponseDto(profileRepository.save(profile));
+        });
+    }
+
+    public boolean deleteProfile(Long profileId) {
+        return profileRepository.findById(profileId).map(profile -> {
+            profileRepository.delete(profile);
+            return true;
+        }).orElse(false);
+    }
+
+    public Optional<ProfileResponseDto> linkProfileToUser(Long profileId, Long userId) {
+        Optional<Profile> profileOpt = profileRepository.findById(profileId);
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (profileOpt.isPresent() && userOpt.isPresent()) {
+            Profile profile = profileOpt.get();
+            User user = userOpt.get();
+            profile.setUser(user);
+            user.setProfile(profile);
+            profileRepository.save(profile);
+            userRepository.save(user);
+            return Optional.of(toProfileResponseDto(profile));
+        }
+        return Optional.empty();
+    }
+
+    public Optional<ProfileResponseDto> getProfileResponseByUserId(Long userId) {
+        return userRepository.findById(userId)
+            .map(User::getProfile)
+            .filter(profile -> profile != null)
+            .map(this::toProfileResponseDto);
+    }
+
+    public Optional<ProfileResponseDto> createProfileForUser(Long userId, ProfileDto profileDto) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.getProfile() != null) {
+                // L'utilisateur a déjà un profil
+                return Optional.empty();
+            }
+            Profile profile = new Profile();
+            profile.setUserName(profileDto.getUserName());
+            profile.setImageUrl(profileDto.getImageUrl());
+            profile.setBio(profileDto.getBio());
+            profile.setInfo(profileDto.getInfo());
+            profile.setUser(user);
+            user.setProfile(profile);
+            profileRepository.save(profile);
+            userRepository.save(user);
+            return Optional.of(toProfileResponseDto(profile));
+        }
+        return Optional.empty();
+    }
+} 
