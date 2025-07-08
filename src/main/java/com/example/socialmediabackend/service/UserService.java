@@ -20,9 +20,6 @@ public class UserService {
     public User createUser(UserDto userDto) {
         User user = new User();
         user.setEmail(userDto.getEmail());
-        if (userDto.getProfileId() != null) {
-            profileRepository.findById(userDto.getProfileId()).ifPresent(user::setProfile);
-        }
         return userRepository.save(user);
     }
 

@@ -16,7 +16,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui-custom.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/posts/**").permitAll()   //.hasRole("USER")
+                        .requestMatchers("/api/posts/**").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()//.hasRole("USER")
                         .requestMatchers("/api/admin/**").permitAll()   // .hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

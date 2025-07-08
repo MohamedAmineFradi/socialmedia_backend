@@ -2,6 +2,7 @@ package com.example.socialmediabackend.dto;
 
 public class UserDto {
     private String email;
+    // profileId is only used for update, not for creation
     private Long profileId;
 
     public String getEmail() {
