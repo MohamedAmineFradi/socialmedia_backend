@@ -1,8 +1,12 @@
 package com.example.socialmediabackend.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

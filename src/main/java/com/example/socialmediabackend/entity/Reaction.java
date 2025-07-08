@@ -1,10 +1,14 @@
 package com.example.socialmediabackend.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
 
 @Entity
+@Getter
+@Setter
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"post_id", "user_id"})})
 public class Reaction {
     @Id

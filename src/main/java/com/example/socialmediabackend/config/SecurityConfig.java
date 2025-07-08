@@ -17,8 +17,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui-custom.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/posts/**").permitAll()
-                        .requestMatchers("/api/users/**").permitAll()//.hasRole("USER")
-                        .requestMatchers("/api/admin/**").permitAll()   // .hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/comments/**").permitAll()
+                        .requestMatchers("/api/reactions/**").permitAll()//.hasRole("USER")
+                        .requestMatchers("/api/admin/**").permitAll()// .hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable());

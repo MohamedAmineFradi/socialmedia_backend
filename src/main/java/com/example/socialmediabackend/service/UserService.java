@@ -1,6 +1,7 @@
 package com.example.socialmediabackend.service;
 
 import com.example.socialmediabackend.dto.UserDto;
+import com.example.socialmediabackend.dto.UserResponseDto;
 import com.example.socialmediabackend.entity.Profile;
 import com.example.socialmediabackend.entity.User;
 import com.example.socialmediabackend.repository.ProfileRepository;
@@ -46,5 +47,18 @@ public class UserService {
             userRepository.delete(user);
             return true;
         }).orElse(false);
+    }
+
+    public UserResponseDto toUserResponseDto(User user) {
+        Long profileId = user.getProfile() != null ? user.getProfile().getId() : null;
+        return new UserResponseDto(user.getId(), user.getEmail(), profileId);
+    }
+
+    public List<UserResponseDto> getAllUserResponses() {
+        return userRepository.findAll().stream().map(this::toUserResponseDto).toList();
+    }
+
+    public Optional<UserResponseDto> getUserResponseById(Long userId) {
+        return userRepository.findById(userId).map(this::toUserResponseDto);
     }
 }

@@ -1,35 +1,82 @@
 package com.example.socialmediabackend.service;
 
+import com.example.socialmediabackend.dto.CommentDto;
+import com.example.socialmediabackend.dto.CommentResponseDto;
 import com.example.socialmediabackend.entity.Comment;
+import com.example.socialmediabackend.entity.Post;
+import com.example.socialmediabackend.entity.User;
 import com.example.socialmediabackend.repository.CommentRepository;
+import com.example.socialmediabackend.repository.PostRepository;
+import com.example.socialmediabackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CommentService {
     private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository) {
+    public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository) {
         this.commentRepository = commentRepository;
+        this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
-    public List<Comment> getAllComments() {
-        return commentRepository.findAll();
+    public CommentResponseDto toCommentResponseDto(Comment comment) {
+        return new CommentResponseDto(
+            comment.getId(),
+            comment.getContent(),
+            comment.getCreatedAt(),
+            comment.getPost() != null ? comment.getPost().getId() : null,
+            comment.getUser() != null ? comment.getUser().getId() : null
+        );
     }
 
-    public Optional<Comment> getCommentById(Long id) {
-        return commentRepository.findById(id);
+    public List<CommentResponseDto> getAllCommentResponsesByPostId(Long postId) {
+        return commentRepository.findAll().stream()
+            .filter(comment -> comment.getPost() != null && comment.getPost().getId().equals(postId))
+            .map(this::toCommentResponseDto).toList();
     }
 
-    public Comment saveComment(Comment comment) {
-        return commentRepository.save(comment);
+    public Optional<CommentResponseDto> getCommentResponseById(Long commentId) {
+        return commentRepository.findById(commentId).map(this::toCommentResponseDto);
     }
 
-    public void deleteComment(Long id) {
-        commentRepository.deleteById(id);
+    public Optional<CommentResponseDto> createCommentResponse(Long postId, Long userId, CommentDto commentDto) {
+        Optional<Post> postOpt = postRepository.findById(postId);
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (postOpt.isPresent() && userOpt.isPresent()) {
+            Comment comment = new Comment();
+            comment.setContent(commentDto.getContent());
+            comment.setCreatedAt(Instant.now());
+            comment.setPost(postOpt.get());
+            comment.setUser(userOpt.get());
+            return Optional.of(toCommentResponseDto(commentRepository.save(comment)));
+        }
+        return Optional.empty();
+    }
+
+    public Optional<CommentResponseDto> updateCommentResponse(Long commentId, Long userId, CommentDto commentDto) {
+        return commentRepository.findById(commentId)
+            .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(userId))
+            .map(comment -> {
+                comment.setContent(commentDto.getContent());
+                return toCommentResponseDto(commentRepository.save(comment));
+            });
+    }
+
+    public boolean deleteComment(Long commentId, Long userId) {
+        return commentRepository.findById(commentId)
+            .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(userId))
+            .map(comment -> {
+                commentRepository.delete(comment);
+                return true;
+            }).orElse(false);
     }
 } 
