@@ -9,7 +9,6 @@ import com.example.socialmediabackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,23 +34,6 @@ public class ProfileService {
         );
     }
 
-    public List<ProfileResponseDto> getAllProfileResponses() {
-        return profileRepository.findAll().stream().map(this::toProfileResponseDto).toList();
-    }
-
-    public Optional<ProfileResponseDto> getProfileResponseById(Long profileId) {
-        return profileRepository.findById(profileId).map(this::toProfileResponseDto);
-    }
-
-    public ProfileResponseDto createProfile(ProfileDto profileDto) {
-        Profile profile = new Profile();
-        profile.setUserName(profileDto.getUserName());
-        profile.setImageUrl(profileDto.getImageUrl());
-        profile.setBio(profileDto.getBio());
-        profile.setInfo(profileDto.getInfo());
-        return toProfileResponseDto(profileRepository.save(profile));
-    }
-
     public Optional<ProfileResponseDto> updateProfile(Long profileId, ProfileDto profileDto) {
         return profileRepository.findById(profileId).map(profile -> {
             profile.setUserName(profileDto.getUserName());
@@ -67,21 +49,6 @@ public class ProfileService {
             profileRepository.delete(profile);
             return true;
         }).orElse(false);
-    }
-
-    public Optional<ProfileResponseDto> linkProfileToUser(Long profileId, Long userId) {
-        Optional<Profile> profileOpt = profileRepository.findById(profileId);
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (profileOpt.isPresent() && userOpt.isPresent()) {
-            Profile profile = profileOpt.get();
-            User user = userOpt.get();
-            profile.setUser(user);
-            user.setProfile(profile);
-            profileRepository.save(profile);
-            userRepository.save(user);
-            return Optional.of(toProfileResponseDto(profile));
-        }
-        return Optional.empty();
     }
 
     public Optional<ProfileResponseDto> getProfileResponseByUserId(Long userId) {
