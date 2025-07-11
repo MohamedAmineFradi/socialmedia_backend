@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/profiles")
+@RequestMapping("/profiles")
 @RequiredArgsConstructor
 public class ProfileController {
     private final ProfileService profileService;
@@ -24,6 +24,13 @@ public class ProfileController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<ProfileResponseDto> getProfileByUserId(@PathVariable Long userId) {
         return profileService.getProfileResponseByUserId(userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/find/user/{userId}")
+    public ResponseEntity<ProfileResponseDto> findProfileByUserId(@PathVariable Long userId) {
+        return profileService.findProfileByUserId(userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

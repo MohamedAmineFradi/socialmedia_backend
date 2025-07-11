@@ -30,7 +30,10 @@ public class PostService {
 
     public PostResponseDto toPostResponseDto(Post post) {
         Long authorId = post.getAuthor() != null ? post.getAuthor().getId() : null;
-        return new PostResponseDto(post.getId(), post.getContent(), post.getCreatedAt(), authorId);
+        int likes = (int) post.getReactions().stream().filter(r -> r.getType() != null && r.getType().name().equals("LIKE")).count();
+        int dislikes = (int) post.getReactions().stream().filter(r -> r.getType() != null && r.getType().name().equals("DISLIKE")).count();
+        int commentCount = post.getComments() != null ? post.getComments().size() : 0;
+        return new PostResponseDto(post.getId(), post.getContent(), post.getCreatedAt(), authorId, likes, dislikes, commentCount);
     }
 
     public List<PostResponseDto> getAllPostResponses() {

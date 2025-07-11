@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reactions")
+@RequestMapping("/reactions")
 @RequiredArgsConstructor
 public class ReactionController {
     private final ReactionService reactionService;
@@ -34,10 +34,19 @@ public class ReactionController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/post/{postId}/user/{userId}")
+    public ResponseEntity<ReactionResponseDto> getReactionByPostAndUser(@PathVariable Long postId, @PathVariable Long userId) {
+        return reactionService.getReactionResponseByPostAndUser(postId, userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     @DeleteMapping("/{reactionId}/user/{userId}")
     public ResponseEntity<Void> deleteReaction(@PathVariable Long reactionId, @PathVariable Long userId) {
         boolean deleted = reactionService.deleteReaction(reactionId, userId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+
 }

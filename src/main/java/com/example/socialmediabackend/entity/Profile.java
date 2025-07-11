@@ -12,12 +12,16 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String userName;
-    private String imageUrl;
+    private String name;
+    private String username;
     private String bio;
+    private String location;
+    private String website;
+    private String birthday;
+    private String avatar;
     private String info;
 
-    @OneToOne(mappedBy = "profile")
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 }

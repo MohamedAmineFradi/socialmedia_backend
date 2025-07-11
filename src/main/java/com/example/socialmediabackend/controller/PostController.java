@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import com.example.socialmediabackend.dto.PostResponseDto;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;

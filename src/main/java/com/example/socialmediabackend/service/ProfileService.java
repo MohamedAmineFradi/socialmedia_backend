@@ -26,9 +26,13 @@ public class ProfileService {
         Long userId = profile.getUser() != null ? profile.getUser().getId() : null;
         return new ProfileResponseDto(
             profile.getId(),
-            profile.getUserName(),
-            profile.getImageUrl(),
+            profile.getName(),
+            profile.getUsername(),
             profile.getBio(),
+            profile.getLocation(),
+            profile.getWebsite(),
+            profile.getBirthday(),
+            profile.getAvatar(),
             profile.getInfo(),
             userId
         );
@@ -36,9 +40,13 @@ public class ProfileService {
 
     public Optional<ProfileResponseDto> updateProfile(Long profileId, ProfileDto profileDto) {
         return profileRepository.findById(profileId).map(profile -> {
-            profile.setUserName(profileDto.getUserName());
-            profile.setImageUrl(profileDto.getImageUrl());
+            profile.setName(profileDto.getName());
+            profile.setUsername(profileDto.getUsername());
             profile.setBio(profileDto.getBio());
+            profile.setLocation(profileDto.getLocation());
+            profile.setWebsite(profileDto.getWebsite());
+            profile.setBirthday(profileDto.getBirthday());
+            profile.setAvatar(profileDto.getAvatar());
             profile.setInfo(profileDto.getInfo());
             return toProfileResponseDto(profileRepository.save(profile));
         });
@@ -67,9 +75,13 @@ public class ProfileService {
                 return Optional.empty();
             }
             Profile profile = new Profile();
-            profile.setUserName(profileDto.getUserName());
-            profile.setImageUrl(profileDto.getImageUrl());
+            profile.setName(profileDto.getName());
+            profile.setUsername(profileDto.getUsername());
             profile.setBio(profileDto.getBio());
+            profile.setLocation(profileDto.getLocation());
+            profile.setWebsite(profileDto.getWebsite());
+            profile.setBirthday(profileDto.getBirthday());
+            profile.setAvatar(profileDto.getAvatar());
             profile.setInfo(profileDto.getInfo());
             profile.setUser(user);
             user.setProfile(profile);
@@ -78,5 +90,9 @@ public class ProfileService {
             return Optional.of(toProfileResponseDto(profile));
         }
         return Optional.empty();
+    }
+
+    public Optional<ProfileResponseDto> findProfileByUserId(Long userId) {
+        return profileRepository.findByUserId(userId).map(this::toProfileResponseDto);
     }
 } 
