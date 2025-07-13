@@ -6,12 +6,14 @@ import com.example.socialmediabackend.entity.Profile;
 import com.example.socialmediabackend.entity.User;
 import com.example.socialmediabackend.repository.ProfileRepository;
 import com.example.socialmediabackend.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
@@ -24,7 +26,20 @@ public class ProfileService {
 
     public ProfileResponseDto toProfileResponseDto(Profile profile) {
         Long userId = profile.getUser() != null ? profile.getUser().getId() : null;
-        return new ProfileResponseDto(
+        
+        // Get user statistics if user exists
+        Integer postCount = 0;
+        Integer commentCount = 0;
+        Integer reactionCount = 0;
+        
+        if (profile.getUser() != null) {
+            User user = profile.getUser();
+            postCount = user.getPosts() != null ? user.getPosts().size() : 0;
+            commentCount = user.getComments() != null ? user.getComments().size() : 0;
+            reactionCount = user.getReactions() != null ? user.getReactions().size() : 0;
+        }
+        
+        ProfileResponseDto dto = new ProfileResponseDto(
             profile.getId(),
             profile.getName(),
             profile.getUsername(),
@@ -34,8 +49,14 @@ public class ProfileService {
             profile.getBirthday(),
             profile.getAvatar(),
             profile.getInfo(),
-            userId
+            userId,
+            postCount,
+            commentCount,
+            reactionCount
         );
+        log.info("Created ProfileResponseDto for user {}: avatar={}, stats: posts={}, comments={}, reactions={}", 
+                userId, profile.getAvatar(), postCount, commentCount, reactionCount);
+        return dto;
     }
 
     public Optional<ProfileResponseDto> updateProfile(Long profileId, ProfileDto profileDto) {
@@ -60,10 +81,21 @@ public class ProfileService {
     }
 
     public Optional<ProfileResponseDto> getProfileResponseByUserId(Long userId) {
-        return userRepository.findById(userId)
-            .map(User::getProfile)
-            .filter(profile -> profile != null)
-            .map(this::toProfileResponseDto);
+        log.info("Getting profile for user ID: {}", userId);
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            log.info("Found user: {} {}", user.getFirstName(), user.getLastName());
+            if (user.getProfile() != null) {
+                log.info("User has profile with avatar: {}", user.getProfile().getAvatar());
+                return Optional.of(toProfileResponseDto(user.getProfile()));
+            } else {
+                log.warn("User {} has no profile", userId);
+            }
+        } else {
+            log.warn("User not found with ID: {}", userId);
+        }
+        return Optional.empty();
     }
 
     public Optional<ProfileResponseDto> createProfileForUser(Long userId, ProfileDto profileDto) {
@@ -93,6 +125,15 @@ public class ProfileService {
     }
 
     public Optional<ProfileResponseDto> findProfileByUserId(Long userId) {
-        return profileRepository.findByUserId(userId).map(this::toProfileResponseDto);
+        log.info("Finding profile by user ID: {}", userId);
+        Optional<Profile> profileOpt = profileRepository.findByUserId(userId);
+        if (profileOpt.isPresent()) {
+            Profile profile = profileOpt.get();
+            log.info("Found profile with avatar: {}", profile.getAvatar());
+            return Optional.of(toProfileResponseDto(profile));
+        } else {
+            log.warn("No profile found for user ID: {}", userId);
+            return Optional.empty();
+        }
     }
 } 

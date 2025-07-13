@@ -14,9 +14,12 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class CommentService {
+    private static final Logger log = LoggerFactory.getLogger(CommentService.class);
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -29,12 +32,18 @@ public class CommentService {
     }
 
     public CommentResponseDto toCommentResponseDto(Comment comment) {
+        String authorName = comment.getUser() != null ? 
+            (comment.getUser().getFirstName() + " " + comment.getUser().getLastName()).trim() : "Unknown User";
+        String authorUsername = comment.getUser() != null ? comment.getUser().getUsername() : null;
+        
         return new CommentResponseDto(
             comment.getId(),
             comment.getContent(),
             comment.getCreatedAt(),
             comment.getPost() != null ? comment.getPost().getId() : null,
-            comment.getUser() != null ? comment.getUser().getId() : null
+            comment.getUser() != null ? comment.getUser().getId() : null,
+            authorName,
+            authorUsername
         );
     }
 
@@ -63,8 +72,15 @@ public class CommentService {
     }
 
     public Optional<CommentResponseDto> updateCommentResponse(Long commentId, Long userId, CommentDto commentDto) {
+        return updateCommentResponse(commentId, userId, commentDto, false);
+    }
+
+    public Optional<CommentResponseDto> updateCommentResponse(Long commentId, Long userId, CommentDto commentDto, boolean isSuperAdmin) {
         return commentRepository.findById(commentId)
-            .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(userId))
+            .filter(comment -> {
+                // Allow if user is the author OR if user is superAdmin
+                return (comment.getUser() != null && comment.getUser().getId().equals(userId)) || isSuperAdmin;
+            })
             .map(comment -> {
                 comment.setContent(commentDto.getContent());
                 return toCommentResponseDto(commentRepository.save(comment));
@@ -72,8 +88,15 @@ public class CommentService {
     }
 
     public boolean deleteComment(Long commentId, Long userId) {
+        return deleteComment(commentId, userId, false);
+    }
+
+    public boolean deleteComment(Long commentId, Long userId, boolean isSuperAdmin) {
         return commentRepository.findById(commentId)
-            .filter(comment -> comment.getUser() != null && comment.getUser().getId().equals(userId))
+            .filter(comment -> {
+                // Allow if user is the author OR if user is superAdmin
+                return (comment.getUser() != null && comment.getUser().getId().equals(userId)) || isSuperAdmin;
+            })
             .map(comment -> {
                 commentRepository.delete(comment);
                 return true;

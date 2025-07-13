@@ -11,6 +11,11 @@ public class ProfileResponseDto {
     private String avatar;
     private String info;
     private Long userId;
+    
+    // User statistics
+    private Integer postCount;
+    private Integer commentCount;
+    private Integer reactionCount;
 
     public ProfileResponseDto() {}
 
@@ -25,6 +30,22 @@ public class ProfileResponseDto {
         this.avatar = avatar;
         this.info = info;
         this.userId = userId;
+    }
+
+    public ProfileResponseDto(Long id, String name, String username, String bio, String location, String website, String birthday, String avatar, String info, Long userId, Integer postCount, Integer commentCount, Integer reactionCount) {
+        this.id = id;
+        this.name = name;
+        this.username = username;
+        this.bio = bio;
+        this.location = location;
+        this.website = website;
+        this.birthday = birthday;
+        this.avatar = avatar;
+        this.info = info;
+        this.userId = userId;
+        this.postCount = postCount;
+        this.commentCount = commentCount;
+        this.reactionCount = reactionCount;
     }
 
     public Long getId() { return id; }
@@ -47,4 +68,11 @@ public class ProfileResponseDto {
     public void setInfo(String info) { this.info = info; }
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+    
+    public Integer getPostCount() { return postCount; }
+    public void setPostCount(Integer postCount) { this.postCount = postCount; }
+    public Integer getCommentCount() { return commentCount; }
+    public void setCommentCount(Integer commentCount) { this.commentCount = commentCount; }
+    public Integer getReactionCount() { return reactionCount; }
+    public void setReactionCount(Integer reactionCount) { this.reactionCount = reactionCount; }
 } 

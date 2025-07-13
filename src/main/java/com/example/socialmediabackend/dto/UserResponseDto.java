@@ -1,39 +1,28 @@
 package com.example.socialmediabackend.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserResponseDto {
     private Long id;
+    private String keycloakId;
+    private String username;
     private String email;
-    private Long profileId;
-
-    public UserResponseDto() {}
-
-    public UserResponseDto(Long id, String email, Long profileId) {
-        this.id = id;
-        this.email = email;
-        this.profileId = profileId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Long getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(Long profileId) {
-        this.profileId = profileId;
-    }
+    private String firstName;
+    private String lastName;
+    private Boolean isActive;
+    private Boolean enabled;
+    private Long createdTimestamp;
+    private List<String> roles;
+    
+    // User statistics
+    private Integer postCount;
+    private Integer commentCount;
+    private Integer reactionCount;
 } 

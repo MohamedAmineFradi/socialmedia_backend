@@ -8,15 +8,19 @@ public class CommentResponseDto {
     private Instant createdAt;
     private Long postId;
     private Long userId;
+    private String authorName;
+    private String authorUsername;
 
     public CommentResponseDto() {}
 
-    public CommentResponseDto(Long id, String content, Instant createdAt, Long postId, Long userId) {
+    public CommentResponseDto(Long id, String content, Instant createdAt, Long postId, Long userId, String authorName, String authorUsername) {
         this.id = id;
         this.content = content;
         this.createdAt = createdAt;
         this.postId = postId;
         this.userId = userId;
+        this.authorName = authorName;
+        this.authorUsername = authorUsername;
     }
 
     public Long getId() { return id; }
@@ -29,4 +33,8 @@ public class CommentResponseDto {
     public void setPostId(Long postId) { this.postId = postId; }
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+    public String getAuthorName() { return authorName; }
+    public void setAuthorName(String authorName) { this.authorName = authorName; }
+    public String getAuthorUsername() { return authorUsername; }
+    public void setAuthorUsername(String authorUsername) { this.authorUsername = authorUsername; }
 } 

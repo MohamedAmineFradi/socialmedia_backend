@@ -87,8 +87,15 @@ public class ReactionService {
     }
 
     public boolean deleteReaction(Long reactionId, Long userId) {
+        return deleteReaction(reactionId, userId, false);
+    }
+
+    public boolean deleteReaction(Long reactionId, Long userId, boolean isSuperAdmin) {
         return reactionRepository.findById(reactionId)
-            .filter(reaction -> reaction.getUser() != null && reaction.getUser().getId().equals(userId))
+            .filter(reaction -> {
+                // Allow if user is the author OR if user is superAdmin
+                return (reaction.getUser() != null && reaction.getUser().getId().equals(userId)) || isSuperAdmin;
+            })
             .map(reaction -> {
                 reactionRepository.delete(reaction);
                 return true;
