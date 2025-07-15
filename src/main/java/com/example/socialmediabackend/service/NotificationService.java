@@ -1,35 +1,16 @@
 package com.example.socialmediabackend.service;
 
 import com.example.socialmediabackend.entity.Notification;
-import com.example.socialmediabackend.repository.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class NotificationService {
-    private final NotificationRepository notificationRepository;
+public interface NotificationService {
+    List<Notification> getAllNotifications();
 
-    @Autowired
-    public NotificationService(NotificationRepository notificationRepository) {
-        this.notificationRepository = notificationRepository;
-    }
+    Optional<Notification> getNotificationById(Long id);
 
-    public List<Notification> getAllNotifications() {
-        return notificationRepository.findAll();
-    }
+    Notification saveNotification(Notification notification);
 
-    public Optional<Notification> getNotificationById(Long id) {
-        return notificationRepository.findById(id);
-    }
-
-    public Notification saveNotification(Notification notification) {
-        return notificationRepository.save(notification);
-    }
-
-    public void deleteNotification(Long id) {
-        notificationRepository.deleteById(id);
-    }
+    void deleteNotification(Long id);
 } 

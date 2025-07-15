@@ -1,22 +1,22 @@
 # Social Media Backend
 
-  [![forthebadge](http://forthebadge.com/images/badges/made-with-java.svg)](http://forthebadge.com)
-  [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
+[![forthebadge](http://forthebadge.com/images/badges/made-with-java.svg)](http://forthebadge.com)
+[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
-
-A modern Spring Boot backend for a social media application. 
+A modern, modular, and secure Spring Boot backend for a social media application, designed with SOLID principles, extensibility, and production-readiness in mind.
 
 ---
 
 ## Table of Contents
 
 - [Features](#features)
+- [Architecture](#architecture)
+- [Security](#security)
 - [API Endpoints](#api-endpoints)
+- [API Documentation (Swagger)](#api-documentation-swagger)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Profile Management](#profile-management)
-- [Contributing](#contributing)
-- [License](#license)
+- [Extensibility & Best Practices](#extensibility--best-practices)
+- [Frontend Integration](#frontend-integration)
 
 ---
 
@@ -25,11 +25,42 @@ A modern Spring Boot backend for a social media application.
 - User CRUD (create, read, update, delete)
 - Post CRUD (with user association)
 - Comment CRUD (with post and user association)
-- Reaction CRUD (with post and user association, unique per user/post)
+- Reaction CRUD (like/dislike, unique per user/post)
 - Profile CRUD (strict 1-to-1 with user, profile created/retrieved via userId)
-- PostgreSQL database integration
+- PostgreSQL database integration (JPA/Hibernate, no manual SQL required)
 - DTOs for all API input/output (no entity exposure)
-- Basic security setup (Keycloak integration planned)
+- Keycloak-based security (OAuth2/OIDC, JWT, roles)
+- Modular, extensible, and SOLID-compliant codebase
+- Swagger/OpenAPI for API documentation and testing
+
+---
+
+## Architecture
+
+- **Java 21 / Spring Boot 3.5.3 / Maven**
+- **SOLID Principles**: All business logic is split into interfaces and implementations for maximum modularity and testability.
+- **Package Structure**:
+  - `service/` — interfaces (e.g., `PostService`)
+  - `service/impl/` — implementations (e.g., `PostServiceImpl`)
+  - `controller/` — REST API endpoints
+  - `dto/` — Data Transfer Objects (API contracts)
+  - `entity/` — JPA entities
+  - `repository/` — Spring Data JPA repositories
+  - `security/` — Security configuration (Keycloak, JWT)
+  - `util/` — Utility classes (e.g., `JwtUtil`)
+- **Database**: PostgreSQL, with JPA/Hibernate for ORM. No manual table creation needed.
+- **Extensible**: Ready for multi-database support and custom SQL (iBatis/MyBatis) if needed.
+
+---
+
+## Security
+
+- **Keycloak** for authentication and authorization (OAuth2/OIDC, JWT)
+- **JWT validation** via Spring Security Resource Server, using Keycloak's JWKS endpoint
+- **Role-based access control**: `superAdmin`, `user` (realm and client roles)
+- **Stateless**: No server-side sessions, fully RESTful
+- **Profile-based config**: Separate security configs for development (`libertalk`) and production
+- **Utility**: `JwtUtil` for extracting user info and roles from JWT
 
 ---
 
@@ -71,6 +102,14 @@ A modern Spring Boot backend for a social media application.
 
 ---
 
+## API Documentation (Swagger)
+
+- **Swagger UI** is available at: `http://localhost:8084/swagger-ui-custom.html`
+- **OpenAPI spec**: `/v3/api-docs`
+- Test and explore all endpoints interactively.
+
+---
+
 ## Installation
 
 1. Clone the repository:
@@ -88,6 +127,29 @@ A modern Spring Boot backend for a social media application.
    ```bash
    ./mvnw spring-boot:run
    ```
+4. (Optional) Configure Keycloak as described in the Keycloak section below.
+
+---
+
+## Frontend Integration
+
+- **Frontend**: Next.js 15.3.5, Node 22.17.0, Tailwind CSS
+- **Authentication**: Integrated with Keycloak (PKCE, silent SSO, role sync)
+- **UI**: Responsive, modern, with modals and animations (Material UI, Flowbite, etc.)
+- **API consumption**: All endpoints documented and ready for mobile/web clients
+
+---
+
+## Extensibility & Best Practices
+
+- **SOLID**: Interfaces for all services, easy to extend or swap implementations
+- **Open/Closed**: Add new features by creating new modules/services without breaking existing code
+- **Multi-DB ready**: Architecture allows for multiple database connections if needed
+- **Custom SQL**: iBatis/MyBatis can be added for advanced queries
+- **Testing**: Unit and integration tests recommended for all services and controllers
+- **Logging**: Comprehensive logging for debugging and audit
+- **Null safety**: Systematic null checks to prevent NPEs
+- **Performance**: Efficient use of JPA relationships, lazy loading, and stateless JWT auth
 
 ---
 
