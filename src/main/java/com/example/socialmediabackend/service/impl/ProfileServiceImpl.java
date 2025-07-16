@@ -140,4 +140,18 @@ public class ProfileServiceImpl implements ProfileService {
             return Optional.empty();
         }
     }
+
+    @Override
+    public Optional<ProfileResponseDto> getProfileResponseByUsername(String username) {
+        log.info("Getting profile for username: {}", username);
+        Optional<Profile> profileOpt = profileRepository.findByUsername(username);
+        if (profileOpt.isPresent()) {
+            Profile profile = profileOpt.get();
+            log.info("Found profile for username {} with avatar {}", username, profile.getAvatar());
+            return Optional.of(toProfileResponseDto(profile));
+        } else {
+            log.warn("Profile not found for username: {}", username);
+            return Optional.empty();
+        }
+    }
 } 

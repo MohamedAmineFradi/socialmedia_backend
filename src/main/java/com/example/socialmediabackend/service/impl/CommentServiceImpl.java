@@ -9,23 +9,30 @@ import com.example.socialmediabackend.repository.CommentRepository;
 import com.example.socialmediabackend.repository.PostRepository;
 import com.example.socialmediabackend.repository.UserRepository;
 import com.example.socialmediabackend.service.CommentService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
+@Transactional
 public class CommentServiceImpl implements CommentService {
     private static final Logger logger = LoggerFactory.getLogger(CommentServiceImpl.class);
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public CommentServiceImpl(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository) {
         this.commentRepository = commentRepository;
@@ -98,11 +105,32 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public boolean deleteComment(Long commentId, Long userId, boolean isSuperAdmin) {
+        logger.info("Attempting to delete comment. commentId={}, userId={}, isSuperAdmin={}", commentId, userId, isSuperAdmin);
         return commentRepository.findById(commentId)
-                .filter(comment -> (comment.getUser() != null && comment.getUser().getId().equals(userId)) || isSuperAdmin)
                 .map(comment -> {
-                    commentRepository.delete(comment);
-                    return true;
-                }).orElse(false);
+                    Long commentOwnerId = comment.getUser() != null ? comment.getUser().getId() : null;
+                    logger.info("Found comment. commentId={}, commentOwnerId={}", commentId, commentOwnerId);
+                    logger.info("Comparing commentOwnerId ({}:{}) to userId ({}:{})", commentOwnerId, commentOwnerId != null ? commentOwnerId.getClass() : "null", userId, userId != null ? userId.getClass() : "null");
+                    if ((commentOwnerId != null && commentOwnerId.equals(userId)) || isSuperAdmin) {
+                        Post post = comment.getPost();
+                        if (post != null) {
+                            post.getComments().removeIf(c -> c.getId().equals(comment.getId())); // Remove by ID for safety
+                            comment.setPost(null); // Break the bidirectional link
+                        }
+                        commentRepository.delete(comment); // Explicitly delete the comment
+                        commentRepository.flush();
+                        entityManager.clear(); // Clear persistence context to prevent detached entity errors
+                        logger.info("Flush called after delete for commentId={}", commentId);
+                        logger.info("Comment deleted. commentId={}, by userId={}, isSuperAdmin={}", commentId, userId, isSuperAdmin);
+                        return true;
+                    } else {
+                        logger.warn("Delete forbidden. commentId={}, userId={}, commentOwnerId={}, isSuperAdmin={}", commentId, userId, commentOwnerId, isSuperAdmin);
+                        return false;
+                    }
+                })
+                .orElseGet(() -> {
+                    logger.warn("Comment not found. commentId={}", commentId);
+                    return false;
+                });
     }
 } 

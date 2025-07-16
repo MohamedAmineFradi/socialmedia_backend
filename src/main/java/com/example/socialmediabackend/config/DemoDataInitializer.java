@@ -17,15 +17,20 @@ public class DemoDataInitializer {
     CommandLineRunner initDemoData(UserRepository userRepository, ProfileRepository profileRepository, PostRepository postRepository, CommentRepository commentRepository, ReactionRepository reactionRepository) {
         return args -> {
             try {
-                // Only create demo data if no users exist (indicating fresh database)
-                if (userRepository.count() == 0) {
+                // Only create demo data if no users, profiles, posts, comments, or reactions exist
+                boolean usersEmpty = userRepository.count() == 0;
+                boolean profilesEmpty = profileRepository.count() == 0;
+                boolean postsEmpty = postRepository.count() == 0;
+                boolean commentsEmpty = commentRepository.count() == 0;
+                boolean reactionsEmpty = reactionRepository.count() == 0;
+                if (usersEmpty && profilesEmpty && postsEmpty && commentsEmpty && reactionsEmpty) {
                     log.info("Initializing demo data...");
                     
-                    // Create database users with proper Keycloak IDs (for demo purposes)
-                    User superAdminUser = createUser("admin-keycloak-id", "admin", "admin@socialmedia.com", "Super", "Admin", userRepository);
-                    User user1 = createUser("user1-keycloak-id", "aminfradi", "user1@example.com", "Amin", "Fradi", userRepository);
-                    User user2 = createUser("user2-keycloak-id", "johndoe", "user2@example.com", "John", "Doe", userRepository);
-                    User user3 = createUser("user3-keycloak-id", "janesmith", "user3@example.com", "Jane", "Smith", userRepository);
+                    // Create database users with real Keycloak IDs
+                    User superAdminUser = createUser("fd45307e-4888-4d03-a920-ea984e18cb8b", "admin", "admin@socialmedia.com", "Super", "Admin", userRepository);
+                    User user1 = createUser("377b77d5-da05-480c-96c7-3fc9c55028cc", "aminfradi", "user1@example.com", "Amin", "Fradi", userRepository);
+                    User user2 = createUser("f19891df-fffd-4b77-85c2-07fdb30f4fc4", "johndoe", "user2@example.com", "John", "Doe", userRepository);
+                    User user3 = createUser("d2152ec9-d13b-402b-bc7c-fe26dde2df2c", "janesmith", "user3@example.com", "Jane", "Smith", userRepository);
                     
                     // Create profiles linked to users
                     createDemoProfiles(profileRepository, superAdminUser, user1, user2, user3);
@@ -57,7 +62,7 @@ public class DemoDataInitializer {
         superAdminProfile.setLocation("System");
         superAdminProfile.setWebsite("admin.socialmedia.com");
         superAdminProfile.setBirthday("January 1st 1990");
-        superAdminProfile.setAvatar("https://randomuser.me/api/portraits/men/99.jpg");
+        superAdminProfile.setAvatar("https://imgs.search.brave.com/yJsR0jQiY21ji0g8M73XX4I0C8B5XdB1Ag3psadzeog/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvZW4vdGh1bWIv/Zi9mNi9GcmllbmRz/cGhvZWJlLmpwZy8y/NTBweC1GcmllbmRz/cGhvZWJlLmpwZw");
         superAdminProfile.setInfo("Platform administrator with full system access");
         superAdminProfile.setUser(superAdminUser);
         profileRepository.save(superAdminProfile);

@@ -135,22 +135,6 @@ public class UserServiceImpl implements UserService {
         return Optional.empty();
     }
 
-    @Override
-    public Optional<UserResponseDto> getFirstUserForDev() {
-        System.out.println("=== UserService.getFirstUserForDev() ===");
-        Optional<User> firstUser = userRepository.findAll().stream().findFirst();
-        if (firstUser.isPresent()) {
-            User user = firstUser.get();
-            System.out.println("First user in database: " + user.getUsername());
-            System.out.println("First user Keycloak ID: " + user.getKeycloakId());
-            UserResponseDto response = convertToResponseDtoWithRoles(user);
-            System.out.println("First user roles assigned: " + response.getRoles());
-            return Optional.of(response);
-        } else {
-            System.out.println("No users found in database");
-            return Optional.empty();
-        }
-    }
 
     @Override
     public Optional<UserResponseDto> createOrUpdateUserFromKeycloak(String keycloakId, String username, String email, String firstName, String lastName) {

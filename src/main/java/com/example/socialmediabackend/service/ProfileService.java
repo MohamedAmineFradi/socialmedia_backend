@@ -15,4 +15,6 @@ public interface ProfileService {
     Optional<ProfileResponseDto> createProfileForUser(Long userId, ProfileDto profileDto);
 
     Optional<ProfileResponseDto> findProfileByUserId(Long userId);
+
+    Optional<ProfileResponseDto> getProfileResponseByUsername(String username);
 } 

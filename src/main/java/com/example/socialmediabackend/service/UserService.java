@@ -18,7 +18,7 @@ public interface UserService {
 
     Optional<UserResponseDto> getCurrentUser();
 
-    Optional<UserResponseDto> getFirstUserForDev();
+
 
     Optional<UserResponseDto> createOrUpdateUserFromKeycloak(String keycloakId, String username, String email, String firstName, String lastName);
 }

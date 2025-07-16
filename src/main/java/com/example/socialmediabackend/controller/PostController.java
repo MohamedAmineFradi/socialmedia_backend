@@ -5,10 +5,11 @@ import com.example.socialmediabackend.dto.PostResponseDto;
 import com.example.socialmediabackend.service.PostService;
 import com.example.socialmediabackend.service.UserService;
 import com.example.socialmediabackend.util.JwtUtil;
+import com.example.socialmediabackend.dto.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,60 +25,49 @@ public class PostController {
     private final JwtUtil jwtUtil;
 
     @GetMapping
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<List<PostResponseDto>> getAllPosts() {
         String currentUser = jwtUtil.getCurrentUsername();
         boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        
-        // Get current user ID for reactions
         Long currentUserId = null;
         if (currentUser != null) {
-            currentUserId = userService.getFirstUserForDev()
+            currentUserId = userService.getUserByUsername(currentUser)
                     .map(user -> user.getId())
-                    .orElse(1L);
+                    .orElse(null);
         }
-        
-        List<PostResponseDto> posts = currentUserId != null ? 
-            postService.getAllPostResponsesWithUserReactions(currentUserId) : 
-            postService.getAllPostResponses();
+        if (currentUserId == null) {
+            log.error("No authenticated user found for fetching posts");
+            return ResponseEntity.status(401).build();
+        }
+        List<PostResponseDto> posts = postService.getAllPostResponsesWithUserReactions(currentUserId);
         return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/{id}")
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<PostResponseDto> getPostById(@PathVariable Long id) {
         String currentUser = jwtUtil.getCurrentUsername();
         boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        
         return postService.getPostResponseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<PostResponseDto> createPost(@RequestBody PostDto postDto) {
         log.info("Creating post with content: {}", postDto.getContent());
-        
-        String currentUserId = jwtUtil.getCurrentUserId();
-        Long userId;
-        
-        if (currentUserId != null) {
-            // In production mode, use the JWT user ID
-            log.info("Using JWT user ID: {}", currentUserId);
-            userId = Long.valueOf(currentUserId);
-        } else {
-            // In dev mode, use the first user from database
-            log.info("No JWT user ID, using first user from database");
-            userId = userService.getFirstUserForDev()
-                    .map(user -> {
-                        log.info("Found first user: {} (ID: {})", user.getUsername(), user.getId());
-                        return user.getId();
-                    })
-                    .orElse(1L); // Fallback to user ID 1
-            log.info("Using user ID: {}", userId);
+        String keycloakId = jwtUtil.getCurrentUserId();
+        if (keycloakId == null) {
+            log.error("No authenticated user found for creating post");
+            return ResponseEntity.status(401).build();
         }
-        
+        Long userId = userService.getUserByKeycloakId(keycloakId)
+                .map(UserResponseDto::getId).orElse(null);
+        if (userId == null) {
+            log.error("No DB user found for Keycloak ID {}");
+            return ResponseEntity.status(401).build();
+        }
         return postService.createPostResponse(userId, postDto)
                 .map(post -> {
                     log.info("Successfully created post with ID: {}", post.getId());
@@ -90,24 +80,21 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody PostDto postDto) {
-        String currentUserId = jwtUtil.getCurrentUserId();
-        Long userId;
+        String keycloakId = jwtUtil.getCurrentUserId();
         boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        
-        if (currentUserId != null) {
-            // In production mode, use the JWT user ID
-            userId = Long.valueOf(currentUserId);
-        } else {
-            // In dev mode, use the first user from database
-            userId = userService.getFirstUserForDev()
-                    .map(user -> user.getId())
-                    .orElse(1L); // Fallback to user ID 1
+        if (keycloakId == null) {
+            log.error("No authenticated user found for updating post");
+            return ResponseEntity.status(401).build();
         }
-        
+        Long userId = userService.getUserByKeycloakId(keycloakId)
+                .map(UserResponseDto::getId).orElse(null);
+        if (userId == null) {
+            log.error("No DB user found for Keycloak ID {}");
+            return ResponseEntity.status(401).build();
+        }
         log.info("Updating post {} by user {} (superAdmin: {})", id, userId, isSuperAdmin);
-        
         return postService.updatePostResponse(id, userId, postDto, isSuperAdmin)
                 .map(post -> {
                     log.info("Successfully updated post with ID: {}", post.getId());
@@ -120,24 +107,21 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        String currentUserId = jwtUtil.getCurrentUserId();
-        Long userId;
+        String keycloakId = jwtUtil.getCurrentUserId();
         boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        
-        if (currentUserId != null) {
-            // In production mode, use the JWT user ID
-            userId = Long.valueOf(currentUserId);
-        } else {
-            // In dev mode, use the first user from database
-            userId = userService.getFirstUserForDev()
-                    .map(user -> user.getId())
-                    .orElse(1L); // Fallback to user ID 1
+        if (keycloakId == null) {
+            log.error("No authenticated user found for deleting post");
+            return ResponseEntity.status(401).build();
         }
-        
+        Long userId = userService.getUserByKeycloakId(keycloakId)
+                .map(UserResponseDto::getId).orElse(null);
+        if (userId == null) {
+            log.error("No DB user found for Keycloak ID {}");
+            return ResponseEntity.status(401).build();
+        }
         log.info("Deleting post {} by user {} (superAdmin: {})", id, userId, isSuperAdmin);
-        
         boolean deleted = postService.deletePost(id, userId, isSuperAdmin);
         if (deleted) {
             log.info("Successfully deleted post {}", id);
@@ -149,11 +133,10 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}")
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<List<PostResponseDto>> getPostsByUserId(@PathVariable String userId) {
         String currentUser = jwtUtil.getCurrentUsername();
         boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        
         List<PostResponseDto> posts = postService.getPostResponsesByUserId(Long.valueOf(userId));
         return ResponseEntity.ok(posts);
     }

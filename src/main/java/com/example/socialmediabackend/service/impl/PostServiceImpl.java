@@ -36,7 +36,13 @@ public class PostServiceImpl implements PostService {
         return postRepository.findById(postId).filter(post ->
                 post.getAuthor().getId().equals(userId) || isSuperAdmin)
             .map(post -> {
+                User author = post.getAuthor();
+                if (author != null) {
+                    author.getPosts().remove(post);
+                    post.setAuthor(null);
+                }
                 postRepository.delete(post);
+                postRepository.flush();
                 return true;
             }).orElse(false);
     }
