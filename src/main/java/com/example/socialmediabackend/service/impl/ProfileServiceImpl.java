@@ -76,6 +76,11 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public boolean deleteProfile(Long profileId) {
         return profileRepository.findById(profileId).map(profile -> {
+            User user = profile.getUser();
+            if (user != null) {
+                user.setProfile(null);
+                profile.setUser(null);
+            }
             profileRepository.delete(profile);
             return true;
         }).orElse(false);

@@ -1,5 +1,6 @@
 package com.example.socialmediabackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,19 +17,18 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private ConversationType type;
+    @ManyToOne
+    @JoinColumn(name = "user1_id", nullable = false)
+    private User user1;
+
+    @ManyToOne
+    @JoinColumn(name = "user2_id", nullable = false)
+    private User user2;
+
+    @OneToMany(mappedBy = "conversation")
+    @JsonIgnore
+    private List<Message> messages = new ArrayList<>();
 
     private Instant createdAt;
-
-    @ManyToMany
-    @JoinTable(
-            name = "user_conversation",
-            joinColumns = @JoinColumn(name = "conversation_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> users = new ArrayList<>();
-
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> messages = new ArrayList<>();
+    private Instant lastUpdated;
 }

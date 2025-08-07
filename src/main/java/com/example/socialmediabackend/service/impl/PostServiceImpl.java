@@ -7,8 +7,12 @@ import com.example.socialmediabackend.entity.Reaction;
 import com.example.socialmediabackend.entity.User;
 import com.example.socialmediabackend.repository.PostRepository;
 import com.example.socialmediabackend.repository.UserRepository;
+import com.example.socialmediabackend.repository.CommentRepository;
+import com.example.socialmediabackend.repository.ReactionRepository;
 import com.example.socialmediabackend.service.PostService;
 import com.example.socialmediabackend.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,15 +20,23 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.socialmediabackend.entity.Comment;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PostServiceImpl implements PostService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final PostRepository postRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final ReactionRepository reactionRepository;
 
     @Override
     public boolean deletePost(Long postId, Long userId) {
@@ -33,18 +45,25 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public boolean deletePost(Long postId, Long userId, boolean isSuperAdmin) {
-        return postRepository.findById(postId).filter(post ->
-                post.getAuthor().getId().equals(userId) || isSuperAdmin)
-            .map(post -> {
-                User author = post.getAuthor();
-                if (author != null) {
-                    author.getPosts().remove(post);
-                    post.setAuthor(null);
-                }
-                postRepository.delete(post);
-                postRepository.flush();
-                return true;
-            }).orElse(false);
+        // First, make sure the post exists and the caller is allowed to delete it
+        return postRepository.findById(postId)
+                .filter(post -> post.getAuthor().getId().equals(userId) || isSuperAdmin)
+                .map(post -> {
+                    // 1) Delete all comments belonging to the post
+                    commentRepository.deleteByPostId(postId);
+                    //    Delete all reactions belonging to the post
+                    reactionRepository.deleteByPostId(postId);
+
+                    // 2) Flush & clear persistence context so that any loaded Comment entities
+                    //    (now removed from the DB) are detached and cannot participate in further flushes
+                    entityManager.flush();
+                    entityManager.clear();
+
+                    // 3) Finally, delete the post by id (will also cascade-delete reactions)
+                    postRepository.deleteById(postId);
+                    return true;
+                })
+                .orElse(false);
     }
 
     @Override

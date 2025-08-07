@@ -45,12 +45,16 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         // Admin endpoints
                         .requestMatchers("/api/admin/**").hasRole("superAdmin")
                         // User endpoints
                         .requestMatchers("/api/user/**").hasAnyRole("user", "superAdmin")
+                        .requestMatchers("/api/conversations/**").hasAnyRole("user", "superAdmin")
+                        .requestMatchers("/api/messages/**").hasAnyRole("user", "superAdmin")
+                        
+
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )

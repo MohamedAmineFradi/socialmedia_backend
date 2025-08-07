@@ -1,5 +1,6 @@
 package com.example.socialmediabackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,13 +17,14 @@ public class Message {
 
     private String body;
     private Instant sentAt;
-    private Instant deliveredAt;
 
     @ManyToOne
-    @JoinColumn(name = "conversation_id")
+    @JoinColumn(name = "conversation_id", nullable = false)
+    @JsonIgnore
     private Conversation conversation;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "sender_id", nullable = false)
+    @JsonIgnore
     private User sender;
 }

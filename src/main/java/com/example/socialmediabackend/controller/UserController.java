@@ -1,6 +1,8 @@
 package com.example.socialmediabackend.controller;
 
 import com.example.socialmediabackend.dto.UserResponseDto;
+import com.example.socialmediabackend.dto.UpdateUserDto;
+import com.example.socialmediabackend.dto.UserBasicInfoDto;
 import com.example.socialmediabackend.service.UserService;
 import com.example.socialmediabackend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +36,16 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    public ResponseEntity<List<UserBasicInfoDto>> getAllUsers() {
+        log.info("[UserController] getAllUsers called");
+        List<UserBasicInfoDto> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/super-admin")
     @PreAuthorize("hasRole('superAdmin')")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+    public ResponseEntity<List<UserResponseDto>> getAllUsersWithRoles() {
         log.info("[UserController] getAllUsers called");
         List<UserResponseDto> users = userService.getAllUsersWithRoles();
         log.info("[UserController] Returning {} users", users.size());
@@ -43,7 +53,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-  @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<UserResponseDto> getCurrentUser() {
         log.info("[UserController] /users/me called");
         String keycloakId = jwtUtil.getCurrentUserId();
@@ -121,5 +131,19 @@ public class UserController {
             log.warn("[UserController] No user found for id={}", id);
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('user', 'superAdmin')")
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @RequestBody UpdateUserDto dto) {
+        boolean isSuperAdmin = jwtUtil.isSuperAdmin();
+        Long currentDbId = userService.getUserByKeycloakId(jwtUtil.getCurrentUserId())
+                .map(UserResponseDto::getId).orElse(null);
+        if (!isSuperAdmin && (currentDbId == null || !currentDbId.equals(id))) {
+            return ResponseEntity.status(403).build();
+        }
+        return userService.updateUserFields(id, dto.username(), dto.email(), dto.firstName(), dto.lastName(), dto.enabled())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

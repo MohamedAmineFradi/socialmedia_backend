@@ -8,13 +8,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Instant;
+import java.util.List;
 
 @Configuration
 @Slf4j
 public class DemoDataInitializer {
 
     @Bean
-    CommandLineRunner initDemoData(UserRepository userRepository, ProfileRepository profileRepository, PostRepository postRepository, CommentRepository commentRepository, ReactionRepository reactionRepository) {
+    CommandLineRunner initDemoData(UserRepository userRepository,
+                                   ProfileRepository profileRepository,
+                                   PostRepository postRepository,
+                                   CommentRepository commentRepository,
+                                   ReactionRepository reactionRepository,
+                                   ConversationRepository conversationRepository,
+                                   MessageRepository messageRepository) {
         return args -> {
             try {
                 // Only create demo data if no users, profiles, posts, comments, or reactions exist
@@ -23,21 +30,24 @@ public class DemoDataInitializer {
                 boolean postsEmpty = postRepository.count() == 0;
                 boolean commentsEmpty = commentRepository.count() == 0;
                 boolean reactionsEmpty = reactionRepository.count() == 0;
-                if (usersEmpty && profilesEmpty && postsEmpty && commentsEmpty && reactionsEmpty) {
+                boolean conversationsEmpty = conversationRepository.count() == 0;
+                boolean messagesEmpty = messageRepository.count() == 0;
+                if (usersEmpty && profilesEmpty && postsEmpty && commentsEmpty && reactionsEmpty && conversationsEmpty && messagesEmpty) {
                     log.info("Initializing demo data...");
-                    
+
                     // Create database users with real Keycloak IDs
                     User superAdminUser = createUser("fd45307e-4888-4d03-a920-ea984e18cb8b", "admin", "admin@socialmedia.com", "Super", "Admin", userRepository);
-                    User user1 = createUser("377b77d5-da05-480c-96c7-3fc9c55028cc", "aminfradi", "user1@example.com", "Amin", "Fradi", userRepository);
-                    User user2 = createUser("f19891df-fffd-4b77-85c2-07fdb30f4fc4", "johndoe", "user2@example.com", "John", "Doe", userRepository);
-                    User user3 = createUser("d2152ec9-d13b-402b-bc7c-fe26dde2df2c", "janesmith", "user3@example.com", "Jane", "Smith", userRepository);
-                    
+                    User user1 = createUser("377b77d5-da05-480c-96c7-3fc9c55028cc", "aminfradi", "aminfradi@gmail.com", "Amin", "Fradi", userRepository);
+                    User user2 = createUser("f19891df-fffd-4b77-85c2-07fdb30f4fc4", "chandlerBing", "chandler@gmail.com", "Chandler", "Bing", userRepository);
+                    User user3 = createUser("d2152ec9-d13b-402b-bc7c-fe26dde2df2c", "rachel", "rachel@gmail.com", "Rachel", "Green", userRepository);
+
                     // Create profiles linked to users
                     createDemoProfiles(profileRepository, superAdminUser, user1, user2, user3);
                     createDemoPosts(postRepository, user1, user2, user3);
                     createDemoComments(commentRepository, postRepository, user1, user2);
                     createDemoReactions(reactionRepository, postRepository, user1, user2);
-                    
+                    createDemoConversations(conversationRepository, messageRepository, user1, user2, user3);
+
                     log.info("Demo data initialization completed successfully!");
                 } else {
                     log.info("Demo data already exists, skipping initialization.");
@@ -82,26 +92,26 @@ public class DemoDataInitializer {
 
         // Profile for user2 (Keycloak user)
         Profile user2Profile = new Profile();
-        user2Profile.setName("John Doe");
-        user2Profile.setUsername("@johndoe");
+        user2Profile.setName("Chandler Bing");
+        user2Profile.setUsername("@chandlerbing");
         user2Profile.setBio("Full Stack Developer | Java & React Enthusiast");
         user2Profile.setLocation("USA");
-        user2Profile.setWebsite("johndoe.dev");
+        user2Profile.setWebsite("chandlerbing.com");
         user2Profile.setBirthday("January 1st 1990");
-        user2Profile.setAvatar("https://randomuser.me/api/portraits/men/1.jpg");
+        user2Profile.setAvatar("https://imgs.search.brave.com/j0Jwn2Pi3f5CieQHBQv6VsG6W12U1osWC7nwBkJuyCw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJjYXZlLmNv/bS93cC93cDkzOTAx/MTQuanBn");
         user2Profile.setInfo("Experienced developer with expertise in modern web technologies");
         user2Profile.setUser(user2);
         profileRepository.save(user2Profile);
 
         // Profile for user3 (Keycloak user)
         Profile user3Profile = new Profile();
-        user3Profile.setName("Jane Smith");
-        user3Profile.setUsername("@janesmith");
+        user3Profile.setName("Rachel Green");
+        user3Profile.setUsername("@rachel");
         user3Profile.setBio("UI/UX Designer | Creative Developer | Design Systems Expert");
-        user3Profile.setLocation("Canada");
-        user3Profile.setWebsite("janesmith.design");
+        user3Profile.setLocation("USA");
+        user3Profile.setWebsite("rachelgreen.fashion");
         user3Profile.setBirthday("March 15th 1995");
-        user3Profile.setAvatar("https://randomuser.me/api/portraits/women/1.jpg");
+        user3Profile.setAvatar("https://duckduckgo.com/i/7417751969c0e845.jpg");
         user3Profile.setInfo("Creative professional focused on user experience and design");
         user3Profile.setUser(user3);
         profileRepository.save(user3Profile);
@@ -206,4 +216,47 @@ public class DemoDataInitializer {
             reactionRepository.save(reaction4);
         }
     }
+
+    private void createDemoConversations(ConversationRepository conversationRepository,
+                                         MessageRepository messageRepository,
+                                         User user1, User user2, User user3) {
+        // Create conversation between user1 (Amin) and user2 (Chandler)
+        Conversation conv1 = new Conversation();
+        conv1.setUser1(user1); // Amin Fradi
+        conv1.setUser2(user2); // Chandler Bing
+        conv1.setCreatedAt(Instant.now().minusSeconds(20)); // Conversation started 20 seconds ago
+        conv1.setLastUpdated(Instant.now().minusSeconds(8)); // Last updated with the latest message
+        conv1 = conversationRepository.save(conv1);
+
+        // Add messages to conv1
+        Message message1 = new Message();
+        message1.setBody("Hello Chandler Bing");
+        message1.setSender(user1); // Amin sends the first message
+        message1.setConversation(conv1);
+        message1.setSentAt(Instant.now().minusSeconds(10)); // Sent 10 seconds ago
+        messageRepository.save(message1);
+
+        Message message2 = new Message();
+        message2.setBody("Hello Amin");
+        message2.setSender(user2); // Chandler replies
+        message2.setConversation(conv1);
+        message2.setSentAt(Instant.now().minusSeconds(8)); // Sent 8 seconds ago
+        messageRepository.save(message2);
+
+        // Create conversation between user2 (Chandler) and user3 (Rachel)
+        Conversation conv2 = new Conversation();
+        conv2.setUser1(user2); // Chandler Bing
+        conv2.setUser2(user3); // Rachel Green
+        conv2.setCreatedAt(Instant.now().minusSeconds(15)); // Conversation started 15 seconds ago
+        conv2.setLastUpdated(Instant.now().minusSeconds(5)); // Last updated with the latest message
+        conv2 = conversationRepository.save(conv2);
+
+        Message message3 = new Message();
+        message3.setBody("Hi Rachel !!");
+        message3.setSender(user2); // Chandler sends the message
+        message3.setConversation(conv2);
+        message3.setSentAt(Instant.now().minusSeconds(5)); // Sent 5 seconds ago
+        messageRepository.save(message3);
+    }
+
 }

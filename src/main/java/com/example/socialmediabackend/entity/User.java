@@ -2,8 +2,12 @@ package com.example.socialmediabackend.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +15,8 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -36,19 +42,13 @@ public class User {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Profile profile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_conversation",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "conversation_id")
-    )
-    private List<Conversation> conversations = new ArrayList<>();
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -68,4 +68,6 @@ public class User {
         this.lastName = lastName;
         this.isActive = true;
     }
+
+    
 }
