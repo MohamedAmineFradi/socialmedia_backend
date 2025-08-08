@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//Implementation of UserService that handles linkage between Keycloak users and application data. 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -26,7 +25,6 @@ public class UserServiceImpl implements UserService {
     private final ProfileRepository profileRepository;
     private final KeycloakAdminClient keycloakAdminClient;
 
-    // Basic queries    
     @Override
     public List<UserBasicInfoDto> getAllUsers() {
         return userRepository.findAll().stream()
@@ -70,9 +68,6 @@ public class UserServiceImpl implements UserService {
                 .map(this::convertToResponseDtoWithRoles);
     }
 
-    // -------------------------------------------------------------------------
-    // Statistics helpers (not exposed in interface, used internally)
-    // -------------------------------------------------------------------------
     public UserStats getUserStats(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
@@ -102,9 +97,6 @@ public class UserServiceImpl implements UserService {
         public int getReactionCount() { return reactionCount; }
     }
 
-    // -------------------------------------------------------------------------
-    // Current user helpers
-    // -------------------------------------------------------------------------
     @Override
     public Optional<UserResponseDto> getCurrentUser() {
         String currentUserId = jwtUtil.getCurrentUserId();
@@ -129,7 +121,6 @@ public class UserServiceImpl implements UserService {
         }
 
         if (currentUserId != null) {
-            // Fallback: try to find by Keycloak ID
             Optional<User> userOpt = userRepository.findByKeycloakId(currentUserId);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
@@ -157,7 +148,6 @@ public class UserServiceImpl implements UserService {
         Optional<User> existingUser = userRepository.findByKeycloakId(keycloakId);
 
         if (existingUser.isPresent()) {
-            // Update existing user
             User user = existingUser.get();
             user.setUsername(username);
             user.setEmail(email);
@@ -166,7 +156,6 @@ public class UserServiceImpl implements UserService {
             user.setIsActive(true);
             return Optional.of(convertToResponseDtoWithRoles(userRepository.save(user)));
         } else {
-            // Create new user
             User newUser = new User(keycloakId, username, email, firstName, lastName);
             User savedUser = userRepository.save(newUser);
 
@@ -237,13 +226,10 @@ public class UserServiceImpl implements UserService {
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Internal helpers
-    // -------------------------------------------------------------------------
+
     private UserResponseDto convertToResponseDtoWithRoles(User user) {
         List<String> roles;
 
-        // For demo purposes, assign roles based on username
         if ("admin".equals(user.getUsername())) {
             roles = List.of("superAdmin");
         } else {

@@ -10,7 +10,6 @@ public class ReactionResponseDto {
     private Long postId;
     private Long userId;
 
-    public ReactionResponseDto() {}
 
     public ReactionResponseDto(Long id, ReactionType type, Instant createdAt, Long postId, Long userId) {
         this.id = id;

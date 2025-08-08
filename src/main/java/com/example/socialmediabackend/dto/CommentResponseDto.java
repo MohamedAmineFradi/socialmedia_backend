@@ -11,7 +11,6 @@ public class CommentResponseDto {
     private String authorName;
     private String authorUsername;
 
-    public CommentResponseDto() {}
 
     public CommentResponseDto(Long id, String content, Instant createdAt, Long postId, Long userId, String authorName, String authorUsername) {
         this.id = id;

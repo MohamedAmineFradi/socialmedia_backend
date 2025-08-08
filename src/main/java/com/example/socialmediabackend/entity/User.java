@@ -25,7 +25,7 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String keycloakId; // Link to Keycloak user ID
+    private String keycloakId;
 
     @Column(nullable = false)
     private String username;
@@ -59,7 +59,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reaction> reactions = new ArrayList<>();
 
-    // Constructor for creating user from Keycloak data
     public User(String keycloakId, String username, String email, String firstName, String lastName) {
         this.keycloakId = keycloakId;
         this.username = username;

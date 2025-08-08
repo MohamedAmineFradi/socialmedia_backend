@@ -24,7 +24,6 @@ public class DemoDataInitializer {
                                    MessageRepository messageRepository) {
         return args -> {
             try {
-                // Only create demo data if no users, profiles, posts, comments, or reactions exist
                 boolean usersEmpty = userRepository.count() == 0;
                 boolean profilesEmpty = profileRepository.count() == 0;
                 boolean postsEmpty = postRepository.count() == 0;
@@ -35,13 +34,11 @@ public class DemoDataInitializer {
                 if (usersEmpty && profilesEmpty && postsEmpty && commentsEmpty && reactionsEmpty && conversationsEmpty && messagesEmpty) {
                     log.info("Initializing demo data...");
 
-                    // Create database users with real Keycloak IDs
                     User superAdminUser = createUser("fd45307e-4888-4d03-a920-ea984e18cb8b", "admin", "admin@socialmedia.com", "Super", "Admin", userRepository);
                     User user1 = createUser("377b77d5-da05-480c-96c7-3fc9c55028cc", "aminfradi", "aminfradi@gmail.com", "Amin", "Fradi", userRepository);
                     User user2 = createUser("f19891df-fffd-4b77-85c2-07fdb30f4fc4", "chandlerBing", "chandler@gmail.com", "Chandler", "Bing", userRepository);
                     User user3 = createUser("d2152ec9-d13b-402b-bc7c-fe26dde2df2c", "rachel", "rachel@gmail.com", "Rachel", "Green", userRepository);
 
-                    // Create profiles linked to users
                     createDemoProfiles(profileRepository, superAdminUser, user1, user2, user3);
                     createDemoPosts(postRepository, user1, user2, user3);
                     createDemoComments(commentRepository, postRepository, user1, user2);
@@ -64,7 +61,6 @@ public class DemoDataInitializer {
     }
 
     private void createDemoProfiles(ProfileRepository profileRepository, User superAdminUser, User user1, User user2, User user3) {
-        // Profile for superAdmin (Keycloak user)
         Profile superAdminProfile = new Profile();
         superAdminProfile.setName("Super Admin");
         superAdminProfile.setUsername("@superAdmin");
@@ -77,7 +73,6 @@ public class DemoDataInitializer {
         superAdminProfile.setUser(superAdminUser);
         profileRepository.save(superAdminProfile);
 
-        // Profile for user1 (Keycloak user)
         Profile user1Profile = new Profile();
         user1Profile.setName("Amin Fradi");
         user1Profile.setUsername("@aminfradi");
@@ -90,7 +85,6 @@ public class DemoDataInitializer {
         user1Profile.setUser(user1);
         profileRepository.save(user1Profile);
 
-        // Profile for user2 (Keycloak user)
         Profile user2Profile = new Profile();
         user2Profile.setName("Chandler Bing");
         user2Profile.setUsername("@chandlerbing");
@@ -103,7 +97,6 @@ public class DemoDataInitializer {
         user2Profile.setUser(user2);
         profileRepository.save(user2Profile);
 
-        // Profile for user3 (Keycloak user)
         Profile user3Profile = new Profile();
         user3Profile.setName("Rachel Green");
         user3Profile.setUsername("@rachel");
@@ -120,31 +113,30 @@ public class DemoDataInitializer {
     private void createDemoPosts(PostRepository postRepository, User user1, User user2, User user3) {
         Post post1 = new Post();
         post1.setContent("Hello everyone! Excited to be part of this amazing social media platform. Looking forward to connecting with fellow developers and tech enthusiasts! 🚀");
-        post1.setCreatedAt(Instant.now().minusSeconds(3600)); // 1 hour ago
+        post1.setCreatedAt(Instant.now().minusSeconds(3600));
         post1.setAuthor(user1);
         postRepository.save(post1);
 
         Post post2 = new Post();
         post2.setContent("Just finished building a new feature using React and Spring Boot. The integration is working perfectly! #FullStack #React #SpringBoot");
-        post2.setCreatedAt(Instant.now().minusSeconds(1800)); // 30 minutes ago
+        post2.setCreatedAt(Instant.now().minusSeconds(1800));
         post2.setAuthor(user2);
         postRepository.save(post2);
 
         Post post3 = new Post();
         post3.setContent("Designing user interfaces is such a rewarding experience. Every pixel matters when creating intuitive user experiences! #UI #UX #Design");
-        post3.setCreatedAt(Instant.now().minusSeconds(900)); // 15 minutes ago
+        post3.setCreatedAt(Instant.now().minusSeconds(900));
         post3.setAuthor(user3);
         postRepository.save(post3);
 
         Post post4 = new Post();
         post4.setContent("Working on some exciting new features for our platform. Can't wait to share them with you all! Stay tuned for updates! 💻");
-        post4.setCreatedAt(Instant.now().minusSeconds(300)); // 5 minutes ago
+        post4.setCreatedAt(Instant.now().minusSeconds(300));
         post4.setAuthor(user1);
         postRepository.save(post4);
     }
 
     private void createDemoComments(CommentRepository commentRepository, PostRepository postRepository, User user1, User user2) {
-        // Get the first two posts for comments
         var posts = postRepository.findAll();
         if (posts.size() >= 2) {
             Post post1 = posts.get(0);
@@ -181,7 +173,6 @@ public class DemoDataInitializer {
     }
 
     private void createDemoReactions(ReactionRepository reactionRepository, PostRepository postRepository, User user1, User user2) {
-        // Get the first two posts for reactions
         var posts = postRepository.findAll();
         if (posts.size() >= 2) {
             Post post1 = posts.get(0);
@@ -220,42 +211,39 @@ public class DemoDataInitializer {
     private void createDemoConversations(ConversationRepository conversationRepository,
                                          MessageRepository messageRepository,
                                          User user1, User user2, User user3) {
-        // Create conversation between user1 (Amin) and user2 (Chandler)
         Conversation conv1 = new Conversation();
-        conv1.setUser1(user1); // Amin Fradi
-        conv1.setUser2(user2); // Chandler Bing
-        conv1.setCreatedAt(Instant.now().minusSeconds(20)); // Conversation started 20 seconds ago
-        conv1.setLastUpdated(Instant.now().minusSeconds(8)); // Last updated with the latest message
+        conv1.setUser1(user1);
+        conv1.setUser2(user2);
+        conv1.setCreatedAt(Instant.now().minusSeconds(20));
+        conv1.setLastUpdated(Instant.now().minusSeconds(8));
         conv1 = conversationRepository.save(conv1);
 
-        // Add messages to conv1
         Message message1 = new Message();
         message1.setBody("Hello Chandler Bing");
-        message1.setSender(user1); // Amin sends the first message
+        message1.setSender(user1);
         message1.setConversation(conv1);
-        message1.setSentAt(Instant.now().minusSeconds(10)); // Sent 10 seconds ago
+        message1.setSentAt(Instant.now().minusSeconds(10));
         messageRepository.save(message1);
 
         Message message2 = new Message();
         message2.setBody("Hello Amin");
-        message2.setSender(user2); // Chandler replies
+        message2.setSender(user2);
         message2.setConversation(conv1);
-        message2.setSentAt(Instant.now().minusSeconds(8)); // Sent 8 seconds ago
+        message2.setSentAt(Instant.now().minusSeconds(8));
         messageRepository.save(message2);
 
-        // Create conversation between user2 (Chandler) and user3 (Rachel)
         Conversation conv2 = new Conversation();
-        conv2.setUser1(user2); // Chandler Bing
-        conv2.setUser2(user3); // Rachel Green
-        conv2.setCreatedAt(Instant.now().minusSeconds(15)); // Conversation started 15 seconds ago
-        conv2.setLastUpdated(Instant.now().minusSeconds(5)); // Last updated with the latest message
+        conv2.setUser1(user2);
+        conv2.setUser2(user3);
+        conv2.setCreatedAt(Instant.now().minusSeconds(15));
+        conv2.setLastUpdated(Instant.now().minusSeconds(5));
         conv2 = conversationRepository.save(conv2);
 
         Message message3 = new Message();
         message3.setBody("Hi Rachel !!");
-        message3.setSender(user2); // Chandler sends the message
+        message3.setSender(user2);
         message3.setConversation(conv2);
-        message3.setSentAt(Instant.now().minusSeconds(5)); // Sent 5 seconds ago
+        message3.setSentAt(Instant.now().minusSeconds(5));
         messageRepository.save(message3);
     }
 

@@ -28,7 +28,6 @@ public class PostController {
     @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<List<PostResponseDto>> getAllPosts() {
         String currentUser = jwtUtil.getCurrentUsername();
-        boolean isSuperAdmin = jwtUtil.isSuperAdmin();
         Long currentUserId = null;
         if (currentUser != null) {
             currentUserId = userService.getUserByUsername(currentUser)
@@ -46,8 +45,6 @@ public class PostController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<PostResponseDto> getPostById(@PathVariable Long id) {
-        String currentUser = jwtUtil.getCurrentUsername();
-        boolean isSuperAdmin = jwtUtil.isSuperAdmin();
         return postService.getPostResponseById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -135,8 +132,6 @@ public class PostController {
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<List<PostResponseDto>> getPostsByUserId(@PathVariable String userId) {
-        String currentUser = jwtUtil.getCurrentUsername();
-        boolean isSuperAdmin = jwtUtil.isSuperAdmin();
         List<PostResponseDto> posts = postService.getPostResponsesByUserId(Long.valueOf(userId));
         return ResponseEntity.ok(posts);
     }

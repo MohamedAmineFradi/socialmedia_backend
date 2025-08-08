@@ -6,6 +6,5 @@ public final class MessageConstants {
     public static final String UNAUTHORIZED_SENDER_MESSAGE = "Invalid or mismatched sender ID. User can only send messages as themselves.";
 
     private MessageConstants() {
-        // Utility class, prevent instantiation
     }
 }

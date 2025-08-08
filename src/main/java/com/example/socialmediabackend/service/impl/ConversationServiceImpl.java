@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ public class ConversationServiceImpl implements ConversationService {
             dto.setCreatedAt(conv.getCreatedAt());
             dto.setLastUpdated(conv.getLastUpdated());
             return dto;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     @Transactional

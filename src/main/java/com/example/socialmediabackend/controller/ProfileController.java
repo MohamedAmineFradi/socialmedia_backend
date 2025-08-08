@@ -54,7 +54,6 @@ public class ProfileController {
     }
 
     @GetMapping("/find/user/{userId}")
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<ProfileResponseDto> findProfileByUserId(@PathVariable Long userId) {
         log.info("Finding profile for user ID: {}", userId);
         Optional<ProfileResponseDto> profileOpt = profileService.findProfileByUserId(userId);
@@ -69,7 +68,6 @@ public class ProfileController {
     }
 
     @GetMapping("/username/{username}")
-    // @PreAuthorize("hasAnyRole('user', 'superAdmin')")
     public ResponseEntity<ProfileResponseDto> getProfileByUsername(@PathVariable String username) {
         log.info("Fetching profile for username: {}", username);
         return profileService.getProfileResponseByUsername(username)
@@ -87,7 +85,6 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // Fetch the existing profile to obtain its primary key (profileId)
         return profileService.findProfileByUserId(userId)
                 .flatMap(existing -> profileService.updateProfile(existing.getId(), profileDto))
                 .map(ResponseEntity::ok)
@@ -95,7 +92,6 @@ public class ProfileController {
     }
 
     @DeleteMapping("/{profileId}")
-    // @PreAuthorize("hasRole('superAdmin')")
     public ResponseEntity<Void> deleteProfile(@PathVariable Long profileId) {
         boolean deleted = profileService.deleteProfile(profileId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();

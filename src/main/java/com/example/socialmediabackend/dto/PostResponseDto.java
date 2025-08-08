@@ -50,7 +50,6 @@ public class PostResponseDto {
     public UserReactionDto getUserReaction() { return userReaction; }
     public void setUserReaction(UserReactionDto userReaction) { this.userReaction = userReaction; }
 
-    // Inner class for user reaction
     public static class UserReactionDto {
         private Long id;
         private String type;

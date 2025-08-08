@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.socialmediabackend.entity.Comment;
 
 @Transactional
 @Service
@@ -45,21 +44,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public boolean deletePost(Long postId, Long userId, boolean isSuperAdmin) {
-        // First, make sure the post exists and the caller is allowed to delete it
         return postRepository.findById(postId)
                 .filter(post -> post.getAuthor().getId().equals(userId) || isSuperAdmin)
                 .map(post -> {
-                    // 1) Delete all comments belonging to the post
                     commentRepository.deleteByPostId(postId);
-                    //    Delete all reactions belonging to the post
                     reactionRepository.deleteByPostId(postId);
 
-                    // 2) Flush & clear persistence context so that any loaded Comment entities
-                    //    (now removed from the DB) are detached and cannot participate in further flushes
                     entityManager.flush();
                     entityManager.clear();
 
-                    // 3) Finally, delete the post by id (will also cascade-delete reactions)
                     postRepository.deleteById(postId);
                     return true;
                 })
@@ -81,7 +74,6 @@ public class PostServiceImpl implements PostService {
         int dislikes = (int) post.getReactions().stream().filter(r -> r.getType() != null && r.getType().name().equals("DISLIKE")).count();
         int commentCount = post.getComments() != null ? post.getComments().size() : 0;
 
-        // Find user's reaction if currentUserId is provided
         PostResponseDto.UserReactionDto userReaction = null;
         if (currentUserId != null) {
             Optional<Reaction> userReactionOpt = post.getReactions().stream()

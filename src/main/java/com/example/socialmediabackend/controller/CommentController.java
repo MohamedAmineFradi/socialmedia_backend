@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.List;
 
 @RestController
@@ -38,8 +37,6 @@ public class CommentController {
         if (currentUserId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        // Only allow if superAdmin or acting as self
         return commentService.createCommentResponse(postId, currentUserId, commentDto)
                 .map(comment -> ResponseEntity.status(HttpStatus.CREATED).body(comment))
                 .orElse(ResponseEntity.notFound().build());
@@ -98,7 +95,6 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         boolean isSuperAdmin = jwtUtil.isSuperAdmin();
-        // Only allow if current user matches userId or is superAdmin
         if (!isSuperAdmin && !currentUserId.equals(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

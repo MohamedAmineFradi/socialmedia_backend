@@ -40,8 +40,6 @@ public class ReactionController {
 
         log.info("Creating/updating reaction for post {} by user {} (superAdmin: {})", postId, userId, isSuperAdmin);
         
-        // For now, reactions don't need superadmin check for creation/update
-        // Users can only create reactions for themselves
         final boolean finalIsSuperAdmin = isSuperAdmin;
         return reactionService.createOrUpdateReactionResponse(postId, userId, reactionDto)
                 .map(reaction -> {

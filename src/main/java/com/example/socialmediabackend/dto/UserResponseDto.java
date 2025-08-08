@@ -21,7 +21,7 @@ public class UserResponseDto {
     private Long createdTimestamp;
     private List<String> roles;
     
-    // User statistics
+
     private Integer postCount;
     private Integer commentCount;
     private Integer reactionCount;

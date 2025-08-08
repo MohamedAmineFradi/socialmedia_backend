@@ -6,7 +6,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class JwtUtil {
@@ -52,7 +51,6 @@ public class JwtUtil {
     }
 
     public List<String> getCurrentUserRoles() {
-        // Get username from JWT and assign roles based on username (matching UserService logic)
         String username = getCurrentUsername();
         if (username != null) {
             if ("admin".equals(username)) {

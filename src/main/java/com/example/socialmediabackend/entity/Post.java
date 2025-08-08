@@ -19,7 +19,6 @@ public class Post {
     private Long id;
 
     private String content;
-    //private String mediaUrl;
     private Instant createdAt;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

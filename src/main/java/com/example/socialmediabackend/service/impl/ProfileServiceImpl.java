@@ -26,7 +26,6 @@ public class ProfileServiceImpl implements ProfileService {
     private ProfileResponseDto toProfileResponseDto(Profile profile) {
         Long userId = profile.getUser() != null ? profile.getUser().getId() : null;
 
-        // Get user statistics if user exists
         Integer postCount = 0;
         Integer commentCount = 0;
         Integer reactionCount = 0;
@@ -111,7 +110,6 @@ public class ProfileServiceImpl implements ProfileService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (user.getProfile() != null) {
-                // L'utilisateur a déjà un profil
                 return Optional.empty();
             }
             Profile profile = new Profile();

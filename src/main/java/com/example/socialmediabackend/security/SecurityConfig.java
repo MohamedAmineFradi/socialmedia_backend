@@ -12,7 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
@@ -24,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -76,12 +74,10 @@ public class SecurityConfig {
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            // Extract realm roles
             Map<String, Object> realmAccess = jwt.getClaim("realm_access");
             Collection<String> realmRoles = realmAccess != null ?
                     (Collection<String>) realmAccess.get("roles") : List.of();
 
-            // Extract client roles
             Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
             Collection<String> clientRoles = List.of();
             if (resourceAccess != null) {
@@ -91,13 +87,11 @@ public class SecurityConfig {
                 }
             }
 
-            // Combine and convert roles to authorities
             return realmRoles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                     .collect(Collectors.toList());
         });
 
-        // Set principal claim name
         converter.setPrincipalClaimName(JwtClaimNames.SUB);
 
         return converter;

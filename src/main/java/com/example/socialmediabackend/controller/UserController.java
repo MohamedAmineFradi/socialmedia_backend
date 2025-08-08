@@ -15,17 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * UserController handles linking Keycloak users to application data.
- *
- * For user management (create, delete, update users, roles, etc.),
- * use Keycloak Admin Console: http://localhost:8081
- *
- * This controller focuses on:
- * - Getting current user info
- * - Syncing user data from Keycloak
- * - Linking Keycloak users to app profiles/posts/comments
- */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor

@@ -9,5 +9,4 @@ public class UserBasicInfoDto {
     private String firstName;
     private String lastName;
     
-    // No complex object references to prevent circular dependencies
 }

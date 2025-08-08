@@ -89,7 +89,7 @@ public class ConversationController {
     private List<Long> createParticipantIds(DetailedConversationDTO dto) {
         if (dto.getUser1Id() == null || dto.getUser2Id() == null) {
             log.error("Null participant IDs detected: user1Id={}, user2Id={}", dto.getUser1Id(), dto.getUser2Id());
-            return null;
+            return List.of();
         }
         return List.of(dto.getUser1Id(), dto.getUser2Id());
     }
@@ -103,7 +103,7 @@ public class ConversationController {
             DetailedConversationDTO dto = conversationService.getConversationById(id);
             if (!user.getId().equals(dto.getUser1Id()) && !user.getId().equals(dto.getUser2Id())) {
                 log.warn("User {} not authorized to access conversation {}", user.getId(), id);
-                return ResponseEntity.status(403).build(); // Authorization check
+                return ResponseEntity.status(403).build();
             }
             log.debug("Found conversation {} for user {}", id, user.getId());
             return ResponseEntity.ok(dto);

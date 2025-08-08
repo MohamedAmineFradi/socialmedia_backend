@@ -60,22 +60,18 @@ public class ReactionServiceImpl implements ReactionService {
         Optional<Post> postOpt = postRepository.findById(postId);
         Optional<User> userOpt = userRepository.findById(userId);
         if (postOpt.isPresent() && userOpt.isPresent()) {
-            // Check if a reaction by this user on this post already exists
             Optional<Reaction> existing = reactionRepository.findByPostIdAndUserId(postId, userId);
             if (existing.isPresent()) {
                 Reaction reaction = existing.get();
-                // Toggle off if same type (undo reaction)
                 if (reaction.getType() == reactionDto.getType()) {
                     reactionRepository.delete(reaction);
-                    return Optional.empty(); // Indicate reaction was removed
+                    return Optional.empty();
                 } else {
-                    // Update to new type
                     reaction.setType(reactionDto.getType());
                     reaction.setCreatedAt(Instant.now());
                     return Optional.of(toReactionResponseDto(reactionRepository.save(reaction)));
                 }
             } else {
-                // Create new reaction
                 Reaction reaction = new Reaction();
                 reaction.setPost(postOpt.get());
                 reaction.setUser(userOpt.get());
