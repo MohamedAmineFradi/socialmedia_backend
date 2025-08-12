@@ -16,7 +16,6 @@ A modern, modular, and secure Spring Boot backend for a social media application
 - [API Documentation (Swagger)](#api-documentation-swagger)
 - [Installation](#installation)
 - [Extensibility & Best Practices](#extensibility--best-practices)
-- [Frontend Integration](#frontend-integration)
 
 ---
 
@@ -121,7 +120,7 @@ A modern, modular, and secure Spring Boot backend for a social media application
    ```properties
    spring.datasource.url=jdbc:postgresql://localhost:5432/social_media_db
    spring.datasource.username=postgres
-   spring.datasource.password=your_password
+   spring.datasource.password=password
    ```
 3. Build and run the application:
    ```bash
@@ -131,22 +130,11 @@ A modern, modular, and secure Spring Boot backend for a social media application
 
 ---
 
-## Frontend Integration
-
-- **Frontend**: Next.js 15.3.5, Node 22.17.0, Tailwind CSS
-- **Authentication**: Integrated with Keycloak (PKCE, silent SSO, role sync)
-- **UI**: Responsive, modern, with modals and animations (Material UI, Flowbite, etc.)
-- **API consumption**: All endpoints documented and ready for mobile/web clients
-
----
-
 ## Extensibility & Best Practices
 
 - **SOLID**: Interfaces for all services, easy to extend or swap implementations
 - **Open/Closed**: Add new features by creating new modules/services without breaking existing code
-- **Multi-DB ready**: Architecture allows for multiple database connections if needed
 - **Custom SQL**: iBatis/MyBatis can be added for advanced queries
-- **Testing**: Unit and integration tests recommended for all services and controllers
 - **Logging**: Comprehensive logging for debugging and audit
 - **Null safety**: Systematic null checks to prevent NPEs
 - **Performance**: Efficient use of JPA relationships, lazy loading, and stateless JWT auth
